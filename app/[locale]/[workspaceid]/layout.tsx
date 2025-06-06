@@ -26,6 +26,10 @@ interface WorkspaceLayoutProps {
 
 export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   const router = useRouter()
+const fetchWorkspaceData = async (workspaceId: string) => {
+  console.log("Simulated fetching data for workspace:", workspaceId);
+  // Add mock return data here if needed
+};
 
   const params = useParams()
   const searchParams = useSearchParams()
