@@ -69,7 +69,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
         await fetchWorkspaceData(workspaceId)
       }
     })()
-  }, [])
+  }, [router, fetchWorkspaceData, workspaceId])
 
   useEffect(() => {
     ;(async () => await fetchWorkspaceData(workspaceId))()
