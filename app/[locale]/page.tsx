@@ -25,4 +25,8 @@ export default function HomePage() {
       </Link>
     </div>
   )
+  
+}
+export async function generateStaticParams() {
+  return [{ locale: "en" }]
 }
