@@ -58,7 +58,12 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   } = useContext(ChatbotUIContext)
 
   const [loading, setLoading] = useState(true)
+const fetchWorkspaceData = async (workspaceId: string) => {
+    setLoading(true)
 
+    const workspace = await getWorkspaceById(workspaceId)
+    setSelectedWorkspace(workspace)
+  
   useEffect(() => {
     ;(async () => {
       const session = (await supabase.auth.getSession()).data.session
@@ -88,11 +93,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     setShowFilesDisplay(false)
   }, [workspaceId])
 
-  const fetchWorkspaceData = async (workspaceId: string) => {
-    setLoading(true)
-
-    const workspace = await getWorkspaceById(workspaceId)
-    setSelectedWorkspace(workspace)
+  
 
     const assistantData = await getAssistantWorkspacesByWorkspaceId(workspaceId)
     setAssistants(assistantData.assistants)
