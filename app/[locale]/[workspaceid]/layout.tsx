@@ -26,7 +26,6 @@ interface WorkspaceLayoutProps {
 
 export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   const router = useRouter()
-
   const params = useParams()
   const searchParams = useSearchParams()
   const workspaceId = params.workspaceid as string
@@ -43,7 +42,6 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     setPrompts,
     setTools,
     setModels,
-    selectedWorkspace,
     setSelectedWorkspace,
     setSelectedChat,
     setChatMessages,
@@ -58,42 +56,12 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   } = useContext(ChatbotUIContext)
 
   const [loading, setLoading] = useState(true)
-const fetchWorkspaceData = async (workspaceId: string) => {
+
+  const fetchWorkspaceData = async (workspaceId: string) => {
     setLoading(true)
 
     const workspace = await getWorkspaceById(workspaceId)
     setSelectedWorkspace(workspace)
-  
-  useEffect(() => {
-    ;(async () => {
-      const session = (await supabase.auth.getSession()).data.session
-
-      if (!session) {
-        return router.push("/login")
-      } else {
-        await fetchWorkspaceData(workspaceId)
-      }
-    })()
-  }, [router, fetchWorkspaceData, workspaceId])
-
-  useEffect(() => {
-    ;(async () => await fetchWorkspaceData(workspaceId))()
-
-    setUserInput("")
-    setChatMessages([])
-    setSelectedChat(null)
-
-    setIsGenerating(false)
-    setFirstTokenReceived(false)
-
-    setChatFiles([])
-    setChatImages([])
-    setNewMessageFiles([])
-    setNewMessageImages([])
-    setShowFilesDisplay(false)
-  }, [workspaceId])
-
-  
 
     const assistantData = await getAssistantWorkspacesByWorkspaceId(workspaceId)
     setAssistants(assistantData.assistants)
@@ -135,8 +103,7 @@ const fetchWorkspaceData = async (workspaceId: string) => {
     const chats = await getChatsByWorkspaceId(workspaceId)
     setChats(chats)
 
-    const collectionData =
-      await getCollectionWorkspacesByWorkspaceId(workspaceId)
+    const collectionData = await getCollectionWorkspacesByWorkspaceId(workspaceId)
     setCollections(collectionData.collections)
 
     const folders = await getFoldersByWorkspaceId(workspaceId)
@@ -166,15 +133,44 @@ const fetchWorkspaceData = async (workspaceId: string) => {
         "You are a friendly, helpful AI assistant.",
       temperature: workspace?.default_temperature || 0.5,
       contextLength: workspace?.default_context_length || 4096,
-      includeProfileContext: workspace?.include_profile_context || true,
+      includeProfileContext: workspace?.include_profile_context ?? true,
       includeWorkspaceInstructions:
-        workspace?.include_workspace_instructions || true,
+        workspace?.include_workspace_instructions ?? true,
       embeddingsProvider:
         (workspace?.embeddings_provider as "openai" | "local") || "openai"
     })
 
     setLoading(false)
   }
+
+  // ✅ useEffect hooks placed after fetchWorkspaceData
+  useEffect(() => {
+    ;(async () => {
+      const session = (await supabase.auth.getSession()).data.session
+      if (!session) {
+        return router.push("/login")
+      } else {
+        await fetchWorkspaceData(workspaceId)
+      }
+    })()
+  }, [router, workspaceId])
+
+  useEffect(() => {
+    ;(async () => await fetchWorkspaceData(workspaceId))()
+
+    setUserInput("")
+    setChatMessages([])
+    setSelectedChat(null)
+
+    setIsGenerating(false)
+    setFirstTokenReceived(false)
+
+    setChatFiles([])
+    setChatImages([])
+    setNewMessageFiles([])
+    setNewMessageImages([])
+    setShowFilesDisplay(false)
+  }, [workspaceId])
 
   if (loading) {
     return <Loading />
